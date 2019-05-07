@@ -47,7 +47,7 @@ def style_transfer():
     sys.argv.extend(["--content", input_filepath])
     sys.argv.extend(["--styles", style_filepath])
     sys.argv.extend(["--output", output_filepath])
-    sys.argv.extend(["--preserve-colors", True])
+    sys.argv.extend(["--preserve-colors"])
     sys.argv.extend(["--network", "/vgg/imagenet-vgg-verydeep-19.mat"])
     evaluate()
 
