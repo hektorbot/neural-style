@@ -5,6 +5,7 @@ from flask import Flask, send_file, request, Response
 from werkzeug.exceptions import BadRequest
 from werkzeug.utils import secure_filename
 import requests
+import config
 
 from neural_style import main as evaluate
 
@@ -47,8 +48,11 @@ def style_transfer():
     sys.argv.extend(["--content", input_filepath])
     sys.argv.extend(["--styles", style_filepath])
     sys.argv.extend(["--output", output_filepath])
-    sys.argv.extend(["--pooling", "max"])
     sys.argv.extend(["--network", "/vgg/imagenet-vgg-verydeep-19.mat"])
+    if config.cli_args is not None:
+        for cli_arg in config.cli_args:
+            sys.argv.extend(cli_arg)
+
     evaluate()
 
     # Send result back to the app
