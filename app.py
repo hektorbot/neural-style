@@ -5,7 +5,6 @@ from flask import Flask, send_file, request, Response
 from werkzeug.exceptions import BadRequest
 from werkzeug.utils import secure_filename
 import requests
-import config
 
 from neural_style import main as evaluate
 
@@ -20,10 +19,18 @@ def health_check():
 
 @app.route("/", methods=["POST"])
 def style_transfer():
+    print("Style transfer initializing...")
     input_file = request.files.get("input")
     style_file = request.files.get("style")
     job_id = request.values.get("job_id")
     cb_url = request.values.get("cb_url")
+
+    iterations = str(request.values.get("iterations", 1000))
+    style_layer_weight_exp = str(request.values.get("style_layer_weight_exp", 1.0))
+    content_weight_blend = str(request.values.get("content_weight_blend", 1.0))
+    pooling = str(request.values.get("pooling", "avg"))
+    preserve_colors = str(request.values.get("preserve_color", False))
+
     if not input_file or not style_file:
         return BadRequest("File not present in request")
     if not job_id:
@@ -49,9 +56,19 @@ def style_transfer():
     sys.argv.extend(["--styles", style_filepath])
     sys.argv.extend(["--output", output_filepath])
     sys.argv.extend(["--network", "/vgg/imagenet-vgg-verydeep-19.mat"])
-    if config.cli_args is not None:
-        for cli_arg in config.cli_args:
-            sys.argv.extend(cli_arg)
+
+    print("--iterations: {}".format(iterations))
+    print("--style-layer-weight-exp: {}".format(style_layer_weight_exp))
+    print("--content-weight-blend: {}".format(content_weight_blend))
+    print("--pooling: {}".format(pooling))
+    print("--preserve-colors: {}".format(preserve_colors))
+
+    sys.argv.extend(["--iterations", iterations])
+    sys.argv.extend(["--style-layer-weight-exp", style_layer_weight_exp])
+    sys.argv.extend(["--content-weight-blend", content_weight_blend])
+    sys.argv.extend(["--pooling", pooling])
+    if preserve_colors is "1":
+        sys.argv.extend(["--preserve-colors"])
 
     evaluate()
 
